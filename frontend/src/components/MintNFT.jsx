@@ -1,6 +1,7 @@
 
+
 // import { useState, useEffect } from "react";
-// import { BrowserProvider, Contract } from "ethers";
+// import { BrowserProvider, Wallet, Contract } from "ethers";
 // import "../styles/MintNFT.css";
 // import contractABI from "../abi/HackathonCertificate.json";
 
@@ -9,8 +10,7 @@
 //   const [recipient, setRecipient] = useState("");
 //   const [minting, setMinting] = useState(false);
 //   const [message, setMessage] = useState("");
-//   const [nftImage, setNftImage] = useState(null);
-//   const [tokenId, setTokenId] = useState(null);
+//   const [nftData, setNftData] = useState(null);
 
 //   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
@@ -39,22 +39,19 @@
 //       const tx = await contract.mintCertificate(recipient, tokenURI);
 //       const receipt = await tx.wait();
 
-//       // Extract Token ID from event
-//       const event = receipt.logs.find((e) => e.fragment.name === "Transfer");
-//       if (!event) throw new Error("Minting event not found!");
-//       const mintedTokenId = event.args.tokenId.toString();
-//       setTokenId(mintedTokenId);
+//       setMessage(`✅ NFT Minted Successfully! Sent to: ${recipient}`);
 
-//       setMessage(`✅ NFT Minted Successfully! Token ID: ${mintedTokenId}`);
+//       // Assuming `mintCertificate` returns a Token ID
+//       const tokenId = receipt.logs[0]?.topics[3]; 
 
-//       // Fetch NFT Metadata
-//       const fetchedTokenURI = await contract.tokenURI(mintedTokenId);
-//       const response = await fetch(fetchedTokenURI);
-//       const metadata = await response.json();
-
-//       setNftImage(metadata.image);
+//       setNftData({
+//         image: "https://ipfs.io/ipfs/bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
+//         recipient,
+//         tokenId,
+//         transactionHash: receipt.transactionHash,
+//       });
 //     } catch (error) {
-//       console.error("Minting error:", error);
+//       console.error(error);
 //       setMessage("❌ Minting Failed! Check console for details.");
 //     } finally {
 //       setMinting(false);
@@ -75,11 +72,23 @@
 //       </button>
 //       <p>{message}</p>
 
-//       {nftImage && (
-//         <div>
-//           <h3>Your Minted NFT</h3>
-//           <img src={nftImage} alt="Minted NFT" width="300" />
-//           <p>Token ID: {tokenId}</p>
+//       {/* Display NFT Details */}
+//       {nftData && (
+//         <div className="nft-details">
+//           <h3>🎨 Minted NFT</h3>
+//           <img src={nftData.image} alt="NFT" width="200px" />
+//           <p><strong>Token ID:</strong> {nftData.tokenId}</p>
+//           <p><strong>Recipient:</strong> {nftData.recipient}</p>
+//           <p>
+//             <strong>Transaction:</strong>{" "}
+//             <a
+//               href={`https://etherscan.io/tx/${nftData.transactionHash}`}
+//               target="_blank"
+//               rel="noopener noreferrer"
+//             >
+//               View on Etherscan
+//             </a>
+//           </p>
 //         </div>
 //       )}
 //     </div>
@@ -130,14 +139,13 @@ const MintNFT = () => {
 
       setMessage(`✅ NFT Minted Successfully! Sent to: ${recipient}`);
 
-      // Assuming `mintCertificate` returns a Token ID
-      const tokenId = receipt.logs[0]?.topics[3]; 
+      // Extract tokenId from the event logs
+      const tokenId = parseInt(receipt.logs[0].topics[3], 16);
 
       setNftData({
-        image: "https://ipfs.io/ipfs/bafkreigaqstowo4aky5niyahjhuejprvl2c76pye3kbodvkhri2eslf2hi",
+        image: "https://ipfs.io/ipfs/bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
         recipient,
         tokenId,
-        transactionHash: receipt.transactionHash,
       });
     } catch (error) {
       console.error(error);
@@ -169,13 +177,13 @@ const MintNFT = () => {
           <p><strong>Token ID:</strong> {nftData.tokenId}</p>
           <p><strong>Recipient:</strong> {nftData.recipient}</p>
           <p>
-            <strong>Transaction:</strong>{" "}
+            <strong>View on OpenSea:</strong>{" "}
             <a
-              href={`https://etherscan.io/tx/${nftData.transactionHash}`}
+              href={`https://testnets.opensea.io/assets/sepolia/${contractAddress}/${nftData.tokenId}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              View on Etherscan
+              OpenSea Testnet
             </a>
           </p>
         </div>
