@@ -1,0 +1,16 @@
+{
+  "hackathons": [
+    {
+      "name": "Hackathon A Winner",
+      "description": "Winner of Hackathon A at XYZ College with Pokemon Team",
+      "image": "ipfs://bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
+      "metadataURI": "ipfs://bafkreie4q65w33vna4gu3lfdcsw7oszq7prtrqsbnmcxw2kas5zgr3bsla"
+    },
+    {
+      "name": "Hackathon B Winner",
+      "description": "Winner of Hackathon B with Infernape",
+      "image": "ipfs://bafybeif3kidivrzi4ept7eb4l7eyps37c4dc4lkqwulzzglu4bwmxqbuky",
+      "metadataURI": "ipfs://bafkreib4ecl75phnej6cjuqq5gwu2jqpazmz6tric5osivh3h3lu5jphpq"
+    }
+  ]
+}

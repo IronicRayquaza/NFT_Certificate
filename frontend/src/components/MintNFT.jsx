@@ -41,14 +41,13 @@
 
 //       setMessage(`✅ NFT Minted Successfully! Sent to: ${recipient}`);
 
-//       // Assuming `mintCertificate` returns a Token ID
-//       const tokenId = receipt.logs[0]?.topics[3]; 
+//       // Extract tokenId from the event logs
+//       const tokenId = parseInt(receipt.logs[0].topics[3], 16);
 
 //       setNftData({
 //         image: "https://ipfs.io/ipfs/bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
 //         recipient,
 //         tokenId,
-//         transactionHash: receipt.transactionHash,
 //       });
 //     } catch (error) {
 //       console.error(error);
@@ -80,13 +79,13 @@
 //           <p><strong>Token ID:</strong> {nftData.tokenId}</p>
 //           <p><strong>Recipient:</strong> {nftData.recipient}</p>
 //           <p>
-//             <strong>Transaction:</strong>{" "}
+//             <strong>View on OpenSea:</strong>{" "}
 //             <a
-//               href={`https://etherscan.io/tx/${nftData.transactionHash}`}
+//               href={`https://testnets.opensea.io/assets/sepolia/${contractAddress}/${nftData.tokenId}`}
 //               target="_blank"
 //               rel="noopener noreferrer"
 //             >
-//               View on Etherscan
+//               OpenSea Testnet
 //             </a>
 //           </p>
 //         </div>
@@ -97,9 +96,9 @@
 
 // export default MintNFT;
 
-
 import { useState, useEffect } from "react";
-import { BrowserProvider, Wallet, Contract } from "ethers";
+import { BrowserProvider, Contract } from "ethers";
+import metadata from "../data/metadata.json";
 import "../styles/MintNFT.css";
 import contractABI from "../abi/HackathonCertificate.json";
 
@@ -109,6 +108,7 @@ const MintNFT = () => {
   const [minting, setMinting] = useState(false);
   const [message, setMessage] = useState("");
   const [nftData, setNftData] = useState(null);
+  const [selectedHackathon, setSelectedHackathon] = useState(0);
 
   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
@@ -133,17 +133,19 @@ const MintNFT = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(contractAddress, contractABI, signer);
 
-      const tokenURI = "ipfs://bafkreigaqstowo4aky5niyahjhuejprvl2c76pye3kbodvkhri2eslf2hi";
-      const tx = await contract.mintCertificate(recipient, tokenURI);
+      // Get selected hackathon metadata
+      const hackathon = metadata.hackathons[selectedHackathon];
+
+      const tx = await contract.mintCertificate(recipient, hackathon.metadataURI);
       const receipt = await tx.wait();
 
-      setMessage(`✅ NFT Minted Successfully! Sent to: ${recipient}`);
-
-      // Extract tokenId from the event logs
+      // Extract tokenId from event logs
       const tokenId = parseInt(receipt.logs[0].topics[3], 16);
 
+      setMessage(`✅ NFT Minted Successfully for ${hackathon.name}! Sent to: ${recipient}`);
+
       setNftData({
-        image: "https://ipfs.io/ipfs/bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
+        image: hackathon.image,
         recipient,
         tokenId,
       });
@@ -164,6 +166,14 @@ const MintNFT = () => {
         value={recipient}
         onChange={(e) => setRecipient(e.target.value)}
       />
+      
+      {/* Dropdown to Select Hackathon */}
+      <select onChange={(e) => setSelectedHackathon(e.target.value)}>
+        {metadata.hackathons.map((hackathon, index) => (
+          <option key={index} value={index}>{hackathon.name}</option>
+        ))}
+      </select>
+
       <button onClick={handleMint} disabled={minting || !provider}>
         {minting ? "Minting..." : "Mint NFT"}
       </button>
