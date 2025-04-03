@@ -35,11 +35,16 @@
 // export default App
 
 import MintNFT from "./components/MintNFT";
+// import UploadNFT from "./components/UploadNFT";
+import GoogleFormData from "./components/GoogleFormData";
 
 function App() {
   return (
     <div>
       <h1>Hackathon NFT Minting</h1>
+      <GoogleFormData />
+      {/* <UploadNFT /> */}
+      <p>Mint your Hackathon Winner NFT</p>
       <MintNFT />
     </div>
   );

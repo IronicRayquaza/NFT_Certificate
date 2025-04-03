@@ -1,7 +1,8 @@
 
 
 // import { useState, useEffect } from "react";
-// import { BrowserProvider, Wallet, Contract } from "ethers";
+// import { BrowserProvider, Contract } from "ethers";
+// import metadata from "../data/metadata.json";
 // import "../styles/MintNFT.css";
 // import contractABI from "../abi/HackathonCertificate.json";
 
@@ -11,6 +12,7 @@
 //   const [minting, setMinting] = useState(false);
 //   const [message, setMessage] = useState("");
 //   const [nftData, setNftData] = useState(null);
+//   const [selectedHackathon, setSelectedHackathon] = useState(0);
 
 //   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
@@ -35,17 +37,19 @@
 //       const signer = await provider.getSigner();
 //       const contract = new Contract(contractAddress, contractABI, signer);
 
-//       const tokenURI = "ipfs://bafkreigaqstowo4aky5niyahjhuejprvl2c76pye3kbodvkhri2eslf2hi";
-//       const tx = await contract.mintCertificate(recipient, tokenURI);
+//       // Get selected hackathon metadata
+//       const hackathon = metadata.hackathons[selectedHackathon];
+
+//       const tx = await contract.mintCertificate(recipient, hackathon.metadataURI);
 //       const receipt = await tx.wait();
 
-//       setMessage(`✅ NFT Minted Successfully! Sent to: ${recipient}`);
-
-//       // Extract tokenId from the event logs
+//       // Extract tokenId from event logs
 //       const tokenId = parseInt(receipt.logs[0].topics[3], 16);
 
+//       setMessage(`✅ NFT Minted Successfully for ${hackathon.name}! Sent to: ${recipient}`);
+
 //       setNftData({
-//         image: "https://ipfs.io/ipfs/bafybeib4q6yks4bwhqcbxxao3hjgqgjurj3hiudyobe4o5si3qpqvsx3be",
+//         image: hackathon.image,
 //         recipient,
 //         tokenId,
 //       });
@@ -66,6 +70,14 @@
 //         value={recipient}
 //         onChange={(e) => setRecipient(e.target.value)}
 //       />
+      
+//       {/* Dropdown to Select Hackathon */}
+//       <select onChange={(e) => setSelectedHackathon(e.target.value)}>
+//         {metadata.hackathons.map((hackathon, index) => (
+//           <option key={index} value={index}>{hackathon.name}</option>
+//         ))}
+//       </select>
+
 //       <button onClick={handleMint} disabled={minting || !provider}>
 //         {minting ? "Minting..." : "Mint NFT"}
 //       </button>
@@ -99,8 +111,8 @@
 import { useState, useEffect } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import metadata from "../data/metadata.json";
-import "../styles/MintNFT.css";
 import contractABI from "../abi/HackathonCertificate.json";
+import "../styles/MintNFT.css";
 
 const MintNFT = () => {
   const [provider, setProvider] = useState(null);
@@ -108,16 +120,13 @@ const MintNFT = () => {
   const [minting, setMinting] = useState(false);
   const [message, setMessage] = useState("");
   const [nftData, setNftData] = useState(null);
-  const [selectedHackathon, setSelectedHackathon] = useState(0);
+  const [selectedNFT, setSelectedNFT] = useState(metadata.hackathons[0]); // ✅ FIXED
 
   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
   useEffect(() => {
-    if (window.ethereum) {
-      setProvider(new BrowserProvider(window.ethereum));
-    } else {
-      setMessage("⚠️ Please install MetaMask.");
-    }
+    if (window.ethereum) setProvider(new BrowserProvider(window.ethereum));
+    else setMessage("⚠️ Please install MetaMask.");
   }, []);
 
   const handleMint = async () => {
@@ -133,19 +142,16 @@ const MintNFT = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(contractAddress, contractABI, signer);
 
-      // Get selected hackathon metadata
-      const hackathon = metadata.hackathons[selectedHackathon];
-
-      const tx = await contract.mintCertificate(recipient, hackathon.metadataURI);
+      const tx = await contract.mintCertificate(recipient, selectedNFT.metadataURI);
       const receipt = await tx.wait();
 
       // Extract tokenId from event logs
       const tokenId = parseInt(receipt.logs[0].topics[3], 16);
 
-      setMessage(`✅ NFT Minted Successfully for ${hackathon.name}! Sent to: ${recipient}`);
+      setMessage(`✅ NFT Minted Successfully for ${selectedNFT.name}! Sent to: ${recipient}`);
 
       setNftData({
-        image: hackathon.image,
+        image: selectedNFT.image,
         recipient,
         tokenId,
       });
@@ -159,7 +165,7 @@ const MintNFT = () => {
 
   return (
     <div className="mint-container">
-      <h2>Mint Hackathon Winner NFT</h2>
+      <h2>Mint Hackathon NFT</h2>
       <input
         type="text"
         placeholder="Enter recipient wallet address"
@@ -167,10 +173,10 @@ const MintNFT = () => {
         onChange={(e) => setRecipient(e.target.value)}
       />
       
-      {/* Dropdown to Select Hackathon */}
-      <select onChange={(e) => setSelectedHackathon(e.target.value)}>
-        {metadata.hackathons.map((hackathon, index) => (
-          <option key={index} value={index}>{hackathon.name}</option>
+      {/* Dropdown to Select NFT */}
+      <select onChange={(e) => setSelectedNFT(metadata.hackathons[e.target.value])}>
+        {metadata.hackathons.map((nft, index) => (
+          <option key={index} value={index}>{nft.name}</option>
         ))}
       </select>
 
